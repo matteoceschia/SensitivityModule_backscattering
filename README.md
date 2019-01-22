@@ -177,7 +177,7 @@ filename_out : string[1] = "my_filename.root"
 
 ## Output tuple structure - Multi-track topology info
 
-**reco.angle_between_tracks** : For 2-electron events: Angle between the initial momentum vectors of the two tracks. Does not require them to share a vertex (maybe it should). For 1-electron-n-gamma events, angle between the electron track and the highest-energy gamma “track”, if we assume that the gamma travels from the foil-most electron vertex to the centre of the calorimeter that it hits first.
+**reco.angle_between_tracks** : For 2-electron events: Angle between the initial momentum vectors of the two tracks. Does not require them to share a vertex (maybe it should). Similar for 1e-1 alpha. For 1-electron-n-gamma events, this is not implemented. If we were to implement, I would recommend calculating it only if there is one and only one gamma associated to the electron vertex (requires gamma tracking). The calculation will be rough as it will assume that the gamma impacts the centre of the optical module - the best we can do, as we have no tracking for gammas, is to assume a straight line from the electron vertex to the centre of the first activated calorimeter. It's possible to estimate an uncertainty based on the geometry, if one felt so inclined (similar to Hichem's work).
 
 **reco.same_side_of_foil** : If 2 tracks: True if both tracks are on the same side of the foil, false if not
 
