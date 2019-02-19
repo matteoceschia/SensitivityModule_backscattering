@@ -512,8 +512,11 @@ SensitivityModule::process(datatools::things& workItem) {
         passesAssociatedCalorimeters=true;
         twoParticles.push_back(&electronCandidateDetails.at(1));
       }
-      CalculateProbabilities(internalProbability, externalProbability,  twoParticles,  false);
-      CalculateProbabilities(foilProjectedInternalProbability, foilProjectedExternalProbability,  twoParticles,  true);
+      if (twoParticles.at(0)->GetTrackLength()>0 && twoParticles.at(1)->GetTrackLength()>0)
+      {
+       CalculateProbabilities(internalProbability, externalProbability,  twoParticles,  false);
+       CalculateProbabilities(foilProjectedInternalProbability, foilProjectedExternalProbability,  twoParticles,  true);
+      } // Don't try to calculate the probabilities if there is no track length (reconstruction error)
     }// end if either 2e or 1e n gamma
   }// end try on PTD bank
   catch (std::logic_error& e) {
@@ -811,6 +814,12 @@ void SensitivityModule::CalculateProbabilities(double &internalProbability, doub
 // Calculate probabilities for an internal (both particles from the foil) and external (calo 1 -> foil -> calo 2) topology
 void SensitivityModule::CalculateProbabilities(double &internalProbability, double &externalProbability, double *calorimeterEnergies,  double *betas, double *trackLengths, double *calorimeterTimes, double *totalTimeVariances )
 {
+  if (trackLengths[0] * trackLengths[1] == 0 || betas[0] * betas[1] == 0)
+  { // We will not get a real answer if these aren't set to something real
+    internalProbability=-1;
+    externalProbability=-1;
+    return;
+  }
   double theoreticalTimeOfFlight[2];
   double internalEmissionTime[2];
   double internalChiSquared;
