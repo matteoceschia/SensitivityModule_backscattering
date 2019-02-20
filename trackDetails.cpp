@@ -116,6 +116,17 @@ double TrackDetails::GenerateGammaTrackLengths(TrackDetails *electronTrack)
   return trackLength_;
 }
 
+TVector3 TrackDetails::GenerateGammaTrackDirection(TrackDetails *electronTrack)
+{
+  // This assumes that the track is from the foilmost vertex of the electron
+  // to the calo that is hit earliest for the gamma
+  if (!IsGamma()) return -1;
+  if (!electronTrack->IsElectron()) return -1;
+  if (foilmostVertex_.x()==-9999 || electronTrack->GetFoilmostVertexX()==-9999) return -1;
+  direction_=(foilmostVertex_ - electronTrack->GetFoilmostVertex()).Unit();
+  return direction_;
+}
+
 bool TrackDetails::GenerateAlphaProjections(TrackDetails *electronTrack)
 {
   // In a 1e1alpha topology, we can recalculate projected track lengths
