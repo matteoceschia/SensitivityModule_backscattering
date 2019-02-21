@@ -122,9 +122,10 @@ TVector3 TrackDetails::GenerateGammaTrackDirection(TrackDetails *electronTrack)
   // to the calo that is hit earliest for the gamma
   TVector3 failVector;
   failVector.SetXYZ(0,0,0);
-  if (!IsGamma()) return failVector;
+  if (!IsGamma()) return failVector; // One gamma and one electron
   if (!electronTrack->IsElectron()) return failVector;
-  if (foilmostVertex_.x()==-9999 || electronTrack->GetFoilmostVertexX()==-9999) return failVector;
+  if (foilmostVertex_.x()==-9999 || electronTrack->GetFoilmostVertexX()==-9999) return failVector; // They need real vertex positions
+  if (!vertexOnFoil_) return failVector; // needs to share a vertex with an electron
   direction_=(foilmostVertex_ - electronTrack->GetFoilmostVertex()).Unit();
   return direction_;
 }
@@ -284,6 +285,19 @@ bool TrackDetails::PopulateCaloHits()
   mainwallFraction_=thisMainWallEnergy/thisEnergy;
   xwallFraction_=thisXwallEnergy/thisEnergy;
   vetoFraction_=thisVetoEnergy/thisEnergy;
+  
+  if (track_.has_vertices()) // There isn't any time ordering to the vertices so check them all
+  {
+    for (unsigned int iVertex=0; iVertex<track_.get_vertices().size();++iVertex)
+    {
+      const geomtools::blur_spot & vertex = track_.get_vertices().at(iVertex).get();
+      if (snemo::datamodel::particle_track::vertex_is_on_source_foil(vertex) || snemo::datamodel::particle_track::vertex_is_on_wire(vertex) )
+      {
+        vertexOnFoil_ = true; // On wire OR foil - just not calo to calo gammas
+      }
+    }
+  }
+  
   return true;
 }
 
@@ -302,7 +316,7 @@ bool TrackDetails::SetFoilmostVertex()
     for (unsigned int iVertex=0; iVertex<track_.get_vertices().size();++iVertex)
     {
       const geomtools::blur_spot & vertex = track_.get_vertices().at(iVertex).get();
-      if (snemo::datamodel::particle_track::vertex_is_on_source_foil(vertex))
+      if (snemo::datamodel::particle_track::vertex_is_on_source_foil(vertex) )
       {
         hasVertexOnFoil = true;
       }
