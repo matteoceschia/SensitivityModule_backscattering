@@ -309,6 +309,8 @@ bool TrackDetails::SetFoilmostVertex()
 bool TrackDetails::SetDirection()
 {
   if ( !hasTrack_) return false;
+  if (GetTrackLength()==0 ) return false; // Makes no sense
+
   if (!track_.has_trajectory()) return false; // Can't get the direction without a trajectory!
   const snemo::datamodel::base_trajectory_pattern & the_base_pattern = track_.get_trajectory().get_pattern();
   geomtools::vector_3d foilmost_end;
