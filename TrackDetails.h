@@ -134,6 +134,7 @@ public:
   
   // For gammas, we need an electron track to calculate an assumed length
   double GenerateGammaTrackLengths(TrackDetails *electronTrack);
+  TVector3 GenerateGammaTrackDirection(TrackDetails *electronTrack);
   // And the same for alpha projections in a 1e1alpha topology
   bool GenerateAlphaProjections(TrackDetails *electronTrack);
 };

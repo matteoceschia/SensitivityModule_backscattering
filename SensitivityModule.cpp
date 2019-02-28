@@ -269,6 +269,8 @@ SensitivityModule::process(datatools::things& workItem) {
   std::vector<TVector3> alphaDirections;
   std::vector<TVector3> alphaProjVertices;
   
+  TVector3 gammaDirection; // We are only calculating this for the highest-energy gamma right now
+  gammaDirection.SetXYZ(0,0,0);
   
   double angleBetweenTracks;
   bool sameSideOfFoil=false;
@@ -505,6 +507,7 @@ SensitivityModule::process(datatools::things& workItem) {
       {
         // Set the track length for the highest-energy gamma based on it sharing a vertex with the electron
         gammaCandidateDetails.at(0).GenerateGammaTrackLengths(&electronCandidateDetails.at(0));
+    gammaDirection=gammaCandidateDetails.at(0).GenerateGammaTrackDirection(&electronCandidateDetails.at(0));
         twoParticles.push_back(&gammaCandidateDetails.at(0));
       }
       if (is2electron) // Second particle is the second electron
@@ -671,7 +674,12 @@ SensitivityModule::process(datatools::things& workItem) {
     double thisProjectionDistance=(electronVertices.at(1)-electronProjVertices.at(1)).Perp();
     if (thisProjectionDistance > projectionDistanceXY)projectionDistanceXY=thisProjectionDistance;
   }
-
+  
+  if(is1engamma && (gammaDirection.Mag()>0))
+  {
+    sensitivity_.angle_between_tracks_= electronDirections.at(0).Angle(gammaDirection);
+  }
+  
   if(is1e1alpha)
   {
     sensitivity_.alpha_track_length_=alphaCandidateDetails.at(0).GetTrackLength();
